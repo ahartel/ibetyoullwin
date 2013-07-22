@@ -80,21 +80,21 @@ public class SeasonDataSource {
         + " = " + id, null);
   }
 
-  public List<Season> getAllComments() {
-    List<Season> comments = new ArrayList<Season>();
+  public List<Season> getAllSeasons() {
+    List<Season> seasons = new ArrayList<Season>();
 
     Cursor cursor = database.query(MySQLiteHelper.TABLE_SEASON,
         allColumns, null, null, null, null, null);
 
     cursor.moveToFirst();
     while (!cursor.isAfterLast()) {
-      Season comment = cursorToSeason(cursor);
-      comments.add(comment);
+      Season s = cursorToSeason(cursor);
+      seasons.add(s);
       cursor.moveToNext();
     }
     // Make sure to close the cursor
     cursor.close();
-    return comments;
+    return seasons;
   }
 
   private Season cursorToSeason(Cursor cursor) {

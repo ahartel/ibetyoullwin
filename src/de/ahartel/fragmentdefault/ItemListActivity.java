@@ -7,6 +7,7 @@ import de.ahartel.SoccerLite.*;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -61,6 +62,10 @@ public class ItemListActivity extends FragmentActivity
                     .findFragmentById(R.id.item_list))
                     .setActivateOnItemClick(true);
         }
+        
+        ItemListFragment listfrag = ((ItemListFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.item_list));
+        listfrag.setValues(datasource.getAllSeasons());
 
         // TODO: If exposing deep links into your app, handle intents here.
     }
@@ -84,6 +89,7 @@ public class ItemListActivity extends FragmentActivity
                     .commit();
 
         } else {
+            Log.i("ItemListActivity", "ItemListActivity.onItemSelected() — id " + id);
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, ItemDetailActivity.class);

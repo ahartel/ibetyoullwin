@@ -7,6 +7,7 @@ import java.util.Random;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,6 +92,11 @@ public class ItemListFragment extends ListFragment {
         setListAdapter(adapter);
     }
     
+    public void setValues(List<Season> seasons)
+    {
+    	adapter.addAll(seasons);
+    }
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
@@ -133,7 +139,7 @@ public class ItemListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
-
+        
         // Notify the active callbacks interface (the activity, if the
         // fragment is attached to one) that an item has been selected.
         mCallbacks.onItemSelected(adapter.getItem(position).getId());
