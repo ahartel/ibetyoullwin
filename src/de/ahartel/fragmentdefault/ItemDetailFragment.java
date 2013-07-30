@@ -2,6 +2,7 @@ package de.ahartel.fragmentdefault;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +28,7 @@ public class ItemDetailFragment extends Fragment {
     /**
      * The dummy content this fragment is presenting.
      */
-    private SeasonDataSource datasource;
-    private Season mItem;
+    private Season mSeason;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -40,16 +40,6 @@ public class ItemDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        datasource = new SeasonDataSource(getActivity());
-        datasource.open();
-
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            mItem = datasource.getSeason(getArguments().getLong(ARG_ITEM_ID));
-        }
     }
 
     @Override
@@ -57,11 +47,24 @@ public class ItemDetailFragment extends Fragment {
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_item_detail, container, false);
 
-        // Show the dummy content as text in a TextView.
-        if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.item_detail)).setText(mItem.getName());
-        }
-
         return rootView;
+    }
+
+    @Override
+    public void onStart()
+    {
+    	super.onStart();
+    	// Show the dummy content as text in a TextView.
+    	if (mSeason != null) {
+    		((TextView) getActivity().findViewById(R.id.item_detail)).setText(mSeason.getName());
+    	}
+    	else {
+    		((TextView) getActivity().findViewById(R.id.item_detail)).setText("define me!");
+    	}
+    }
+    
+    public void setSeason(Season s) {
+    	Log.i("ItemDetailFragment","setSeason called.");
+    	mSeason = s;
     }
 }

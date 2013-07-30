@@ -30,8 +30,8 @@ import android.widget.TextView;
  * {@link ItemListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class ItemListActivity extends FragmentActivity
-        implements ItemListFragment.Callbacks {
+public class SeasonActivity extends FragmentActivity
+        implements SeasonListFragment.Callbacks {
 	
 	private SeasonDataSource datasource;
 
@@ -58,12 +58,12 @@ public class ItemListActivity extends FragmentActivity
 
             // In two-pane mode, list items should be given the
             // 'activated' state when touched.
-            ((ItemListFragment) getSupportFragmentManager()
+            ((SeasonListFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.item_list))
                     .setActivateOnItemClick(true);
         }
         
-        ItemListFragment listfrag = ((ItemListFragment) getSupportFragmentManager()
+        SeasonListFragment listfrag = ((SeasonListFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.item_list));
         listfrag.setValues(datasource.getAllSeasons());
 
@@ -92,7 +92,7 @@ public class ItemListActivity extends FragmentActivity
             Log.i("ItemListActivity", "ItemListActivity.onItemSelected() — id " + id);
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
-            Intent detailIntent = new Intent(this, ItemDetailActivity.class);
+            Intent detailIntent = new Intent(this, TeamActivity.class);
             detailIntent.putExtra(ItemDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }
@@ -103,7 +103,7 @@ public class ItemListActivity extends FragmentActivity
     public void onClick(View view) {
       @SuppressWarnings("unchecked")
       
-      ItemListFragment listfrag = ((ItemListFragment) getSupportFragmentManager()
+      SeasonListFragment listfrag = ((SeasonListFragment) getSupportFragmentManager()
               .findFragmentById(R.id.item_list));
 
       Season s = null;

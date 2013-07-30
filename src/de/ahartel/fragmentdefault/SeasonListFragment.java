@@ -26,7 +26,7 @@ import de.ahartel.SoccerLite.*;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class ItemListFragment extends ListFragment {
+public class SeasonListFragment extends ListFragment {
 	
 	List<Season> values;
 	ArrayAdapter<Season> adapter;
@@ -74,7 +74,7 @@ public class ItemListFragment extends ListFragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ItemListFragment() {
+    public SeasonListFragment() {
     }
 
     @Override
@@ -100,7 +100,7 @@ public class ItemListFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
-      View view = inflater.inflate(R.layout.fragment_item_list,
+      View view = inflater.inflate(R.layout.season_list,
           container, false);
       return view;
     }

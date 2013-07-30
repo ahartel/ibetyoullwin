@@ -10,15 +10,15 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
-public class SeasonDataSource {
+public class TeamDataSource {
 
   // Database fields
   private SQLiteDatabase database;
   private MySQLiteHelper dbHelper;
-  private String[] allColumns = { MySQLiteHelper.SN_COLUMN_ID,
-      MySQLiteHelper.SN_COLUMN_NAME, MySQLiteHelper.SN_COLUMN_STARTED };
+  private String[] allColumns = { MySQLiteHelper.TM_COLUMN_ID,
+      MySQLiteHelper.TM_COLUMN_NAME };
 
-  public SeasonDataSource(Context context) {
+  public TeamDataSource(Context context) {
     dbHelper = new MySQLiteHelper(context);
   }
 
@@ -44,31 +44,31 @@ public class SeasonDataSource {
 }
   */
 
-  public Season createSeason(String name, Date started) {
+  public Team createTeam(String name, long season_id) {
     ContentValues values = new ContentValues();
-    values.put(MySQLiteHelper.SN_COLUMN_NAME, name);
-    values.put(MySQLiteHelper.SN_COLUMN_STARTED, "2013-07-21 10:40:50");
+    values.put(MySQLiteHelper.TM_COLUMN_NAME, name);
+    values.put(MySQLiteHelper.TM_COLUMN_SEASON, season_id);
     
-    long insertId = database.insert(MySQLiteHelper.TABLE_SEASON, null,
+    long insertId = database.insert(MySQLiteHelper.TABLE_TEAM, null,
         values);
-    Cursor cursor = database.query(MySQLiteHelper.TABLE_SEASON,
-        allColumns, MySQLiteHelper.SN_COLUMN_ID + " = " + insertId, null,
+    Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM,
+        allColumns, MySQLiteHelper.TM_COLUMN_ID + " = " + insertId, null,
         null, null, null);
     
     cursor.moveToFirst();
-    Season newComment = cursorToSeason(cursor);
+    Team newTeam = cursorToTeam(cursor);
     cursor.close();
-    return newComment;
+    return newTeam;
   }
   
-  public Season getSeason(long id) {
+  public Team getSeason(long id) {
 
-	    Cursor cursor = database.query(MySQLiteHelper.TABLE_SEASON,
-	        allColumns, MySQLiteHelper.SN_COLUMN_ID + " = " + id, null,
+	    Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM,
+	        allColumns, MySQLiteHelper.TM_COLUMN_ID + " = " + id, null,
 	        null, null, null);
 	    
 	    cursor.moveToFirst();
-	    Season newComment = cursorToSeason(cursor);
+	    Team newComment = cursorToTeam(cursor);
 	    cursor.close();
 	    return newComment;
 	  }
@@ -76,29 +76,29 @@ public class SeasonDataSource {
   public void deleteSeason(Season s) {
     long id = s.getId();
     System.out.println("Comment deleted with id: " + id);
-    database.delete(MySQLiteHelper.TABLE_SEASON, MySQLiteHelper.SN_COLUMN_ID
+    database.delete(MySQLiteHelper.TABLE_TEAM, MySQLiteHelper.TM_COLUMN_ID
         + " = " + id, null);
   }
 
-  public List<Season> getAllSeasons() {
-    List<Season> seasons = new ArrayList<Season>();
+  public List<Team> getAllTeams(long season) {
+    List<Team> teams = new ArrayList<Team>();
 
-    Cursor cursor = database.query(MySQLiteHelper.TABLE_SEASON,
-        allColumns, null, null, null, null, null);
+    Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM,
+        allColumns, MySQLiteHelper.TM_COLUMN_SEASON + " = " + season, null, null, null, null);
 
     cursor.moveToFirst();
     while (!cursor.isAfterLast()) {
-      Season s = cursorToSeason(cursor);
-      seasons.add(s);
+      Team s = cursorToTeam(cursor);
+      teams.add(s);
       cursor.moveToNext();
     }
     // Make sure to close the cursor
     cursor.close();
-    return seasons;
+    return teams;
   }
 
-  private Season cursorToSeason(Cursor cursor) {
-    Season s = new Season();
+  private Team cursorToTeam(Cursor cursor) {
+    Team s = new Team();
     s.setId(cursor.getLong(0));
     s.setName(cursor.getString(1));
     return s;
