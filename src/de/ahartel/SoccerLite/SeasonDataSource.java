@@ -21,6 +21,11 @@ public class SeasonDataSource {
   public SeasonDataSource(Context context) {
     dbHelper = new MySQLiteHelper(context);
   }
+  
+  public SeasonDataSource(MySQLiteHelper helper, SQLiteDatabase db) {
+	    dbHelper = helper;
+	    database = db;
+	  }
 
   public void open() throws SQLException {
     database = dbHelper.getWritableDatabase();
@@ -102,5 +107,9 @@ public class SeasonDataSource {
     s.setId(cursor.getLong(0));
     s.setName(cursor.getString(1));
     return s;
+  }
+  
+  public void drop_recreate_db() {
+	  dbHelper.drop_recreate(database);
   }
 } 

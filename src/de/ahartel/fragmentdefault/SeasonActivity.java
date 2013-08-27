@@ -131,6 +131,10 @@ public class SeasonActivity extends FragmentActivity
         */
       }
     }
+    
+    public void drop_recreate_db() {
+    	datasource.drop_recreate_db();
+    }
 
     @Override
     public void onResume() {
