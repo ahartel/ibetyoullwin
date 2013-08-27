@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="11"
+        android:minSdkVersion="14"
         android:targetSdkVersion="17" />
 
     <application
@@ -29,6 +29,22 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".SeasonActivity" />
+        </activity>
+        <activity
+            android:name="de.ahartel.fragmentdefault.MatchListActivity"
+            android:label="@string/title_item_detail"
+            android:parentActivityName=".TeamActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".TeamActivity" />
+        </activity>
+		<activity
+            android:name="de.ahartel.fragmentdefault.MatchActivity"
+            android:label="@string/title_item_detail"
+            android:parentActivityName=".MatchListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MatchListActivity" />
         </activity>
     </application>
 

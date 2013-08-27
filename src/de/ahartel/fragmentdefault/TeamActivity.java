@@ -69,7 +69,7 @@ public class TeamActivity extends FragmentActivity
         }
         
         TeamListFragment listfrag = ((TeamListFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.item_list));
+                .findFragmentById(R.id.team_list));
         listfrag.setValues(datasource.getAllTeams(mSeasonId));
 
         // TODO: If exposing deep links into your app, handle intents here.
@@ -94,11 +94,12 @@ public class TeamActivity extends FragmentActivity
                     .commit();
 
         } else {
-            Log.i("ItemListActivity", "ItemListActivity.onItemSelected() — id " + id);
+            //Log.i("TeamActivity", "ItemListActivity.onItemSelected() — id " + id);
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
-            Intent detailIntent = new Intent(this, TeamActivity.class);
-            //detailIntent.putExtra(MatchListFragment.ARG_ITEM_ID, id);
+            Intent detailIntent = new Intent(this, MatchListActivity.class);
+            detailIntent.putExtra(MatchListFragment.ARG_SEASON_ID, mSeasonId);
+            detailIntent.putExtra(MatchListFragment.ARG_TEAM_ID, id);
             startActivity(detailIntent);
         }
     }
@@ -109,7 +110,7 @@ public class TeamActivity extends FragmentActivity
       @SuppressWarnings("unchecked")
       
       TeamListFragment listfrag = ((TeamListFragment) getSupportFragmentManager()
-              .findFragmentById(R.id.item_list));
+              .findFragmentById(R.id.team_list));
 
       Team t = null;
       switch (view.getId()) {

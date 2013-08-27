@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.Switch;
 import de.ahartel.SoccerLite.*;
 //import de.ahartel.fragmentdefault.dummy.DummyContent;
 
@@ -26,10 +28,21 @@ import de.ahartel.SoccerLite.*;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class TeamListFragment extends ListFragment {
+public class MatchListFragment extends ListFragment {
 	
-	List<Team> values;
-	ArrayAdapter<Team> adapter;
+    /**
+     * The fragment argument representing the item ID that this fragment
+     * represents.
+     */
+    public static final String ARG_SEASON_ID = "season_id";
+    public static final String ARG_TEAM_ID = "team_id";
+	
+    // Team list for spinner
+    List<Team> teams;
+    ArrayAdapter<Team> spinner_adapter;
+    
+	List<Match> values;
+	ArrayAdapter<Match> adapter;
 	
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -74,17 +87,17 @@ public class TeamListFragment extends ListFragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public TeamListFragment() {
+    public MatchListFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        values = new ArrayList<Team>();
+        values = new ArrayList<Match>();
 
         // TODO: replace with a real list adapter.
-        adapter = new ArrayAdapter<Team>(
+        adapter = new ArrayAdapter<Match>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
@@ -92,16 +105,40 @@ public class TeamListFragment extends ListFragment {
         setListAdapter(adapter);
     }
     
-    public void setValues(List<Team> seasons)
+    public void setValues(List<Match> matches)
     {
-    	adapter.addAll(seasons);
+    	adapter.addAll(matches);
+    }
+    
+    public void setTeams(List<Team> teams)
+    {
+    	spinner_adapter.addAll(teams);
     }
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
-      View view = inflater.inflate(R.layout.team_list,
+      View view = inflater.inflate(R.layout.match_list,
           container, false);
+      
+      // opponent spinner
+      teams = new ArrayList<Team>();
+      // Create an ArrayAdapter using the string array and a default spinner layout
+      spinner_adapter = new ArrayAdapter<Team>(getActivity(),
+  	        android.R.layout.simple_spinner_item,teams);
+      // Spinner adapter
+      Spinner spinner = (Spinner) view.findViewById(R.id.opponent);
+      // Specify the layout to use when the list of choices appears
+      spinner_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+      // Apply the adapter to the spinner
+      spinner.setAdapter(spinner_adapter);
+      spinner.setOnItemSelectedListener((MatchListActivity)getActivity());
+      
+      // Home-Away Switch
+      Switch home_switch = (Switch) view.findViewById(R.id.home_away);
+      home_switch.setTextOff("Home");
+      home_switch.setTextOn("Away");
+      
       return view;
     }
 
@@ -176,17 +213,17 @@ public class TeamListFragment extends ListFragment {
         mActivatedPosition = position;
     }
  
-    public void add(Team s)
+    public void add(Match m)
     {
-    	adapter.add(s);
+    	adapter.add(m);
     }
     
-    public Team front()
+    public Match front()
     {
     	return adapter.getItem(0);
     }
     
-    public void remove(Team s)
+    public void remove(Match s)
     {
     	adapter.remove(s);
     }

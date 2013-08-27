@@ -21,6 +21,11 @@ public class TeamDataSource {
   public TeamDataSource(Context context) {
     dbHelper = new MySQLiteHelper(context);
   }
+  
+  public TeamDataSource(MySQLiteHelper helper, SQLiteDatabase db) {
+	    dbHelper = helper;
+	    database = db;
+	  }
 
   public void open() throws SQLException {
     database = dbHelper.getWritableDatabase();
@@ -61,7 +66,7 @@ public class TeamDataSource {
     return newTeam;
   }
   
-  public Team getSeason(long id) {
+  public Team getTeam(long id) {
 
 	    Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM,
 	        allColumns, MySQLiteHelper.TM_COLUMN_ID + " = " + id, null,
@@ -96,6 +101,24 @@ public class TeamDataSource {
     cursor.close();
     return teams;
   }
+  
+  public List<Team> getAllTeamsNotThis(long season, long team) {
+	    List<Team> teams = new ArrayList<Team>();
+
+	    Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM,
+	        allColumns, MySQLiteHelper.TM_COLUMN_SEASON + " = " + season + " AND "+ MySQLiteHelper.TM_COLUMN_ID + " != " + team, null , null, null, null);
+
+	    cursor.moveToFirst();
+	    while (!cursor.isAfterLast()) {
+	      Team s = cursorToTeam(cursor);
+	      teams.add(s);
+	      cursor.moveToNext();
+	    }
+	    // Make sure to close the cursor
+	    cursor.close();
+	    return teams;
+	  }
+
 
   private Team cursorToTeam(Cursor cursor) {
     Team s = new Team();

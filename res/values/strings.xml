@@ -3,5 +3,7 @@
 
     <string name="app_name">FragmentDefault</string>
     <string name="title_item_detail">Item Detail</string>
+    <string name="pick_date">Datum</string>
+    <string name="action_wipe">Wipe Database</string>
 
 </resources>

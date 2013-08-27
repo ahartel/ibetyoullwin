@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import de.ahartel.SoccerLite.Season;
 import de.ahartel.SoccerLite.SeasonDataSource;
-import de.ahartel.fragmentdefault.dummy.DummyContent;
 
 /**
  * A fragment representing a single Item detail screen.
