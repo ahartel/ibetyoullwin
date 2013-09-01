@@ -15,8 +15,8 @@ public class TeamDataSource {
   // Database fields
   private SQLiteDatabase database;
   private MySQLiteHelper dbHelper;
-  private String[] allColumns = { MySQLiteHelper.TM_COLUMN_ID,
-      MySQLiteHelper.TM_COLUMN_NAME };
+  private String[] allColumns = { MySQLiteHelper.TABLE_TEAM+"."+MySQLiteHelper.TM_COLUMN_ID,
+		  MySQLiteHelper.TABLE_TEAM+"."+MySQLiteHelper.TM_COLUMN_NAME };
 
   public TeamDataSource(Context context) {
     dbHelper = new MySQLiteHelper(context);
@@ -50,15 +50,20 @@ public class TeamDataSource {
   */
 
   public Team createTeam(String name, long season_id) {
-    ContentValues values = new ContentValues();
-    values.put(MySQLiteHelper.TM_COLUMN_NAME, name);
-    values.put(MySQLiteHelper.TM_COLUMN_SEASON, season_id);
+    ContentValues values_team = new ContentValues();
+    values_team.put(MySQLiteHelper.TM_COLUMN_NAME, name);
     
     long insertId = database.insert(MySQLiteHelper.TABLE_TEAM, null,
-        values);
+        values_team);
     Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM,
         allColumns, MySQLiteHelper.TM_COLUMN_ID + " = " + insertId, null,
         null, null, null);
+    
+    ContentValues values_ts = new ContentValues();
+    values_ts.put(MySQLiteHelper.TS_COLUMN_TEAM,insertId);
+    values_ts.put(MySQLiteHelper.TS_COLUMN_SEASON, season_id);
+    database.insert(MySQLiteHelper.TABLE_TEAM_TO_SEASON, null,
+            values_ts);
     
     cursor.moveToFirst();
     Team newTeam = cursorToTeam(cursor);
@@ -88,8 +93,10 @@ public class TeamDataSource {
   public List<Team> getAllTeams(long season) {
     List<Team> teams = new ArrayList<Team>();
 
-    Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM,
-        allColumns, MySQLiteHelper.TM_COLUMN_SEASON + " = " + season, null, null, null, null);
+    Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM+","+MySQLiteHelper.TABLE_TEAM_TO_SEASON,
+    		allColumns,
+    		MySQLiteHelper.TABLE_TEAM_TO_SEASON+"."+MySQLiteHelper.TS_COLUMN_SEASON + " = " + season + " AND " + MySQLiteHelper.TS_COLUMN_TEAM + " = " + MySQLiteHelper.TABLE_TEAM + "."+ MySQLiteHelper.TM_COLUMN_ID,
+    		null, null, null, null);
 
     cursor.moveToFirst();
     while (!cursor.isAfterLast()) {
@@ -105,8 +112,11 @@ public class TeamDataSource {
   public List<Team> getAllTeamsNotThis(long season, long team) {
 	    List<Team> teams = new ArrayList<Team>();
 
-	    Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM,
-	        allColumns, MySQLiteHelper.TM_COLUMN_SEASON + " = " + season + " AND "+ MySQLiteHelper.TM_COLUMN_ID + " != " + team, null , null, null, null);
+	    Cursor cursor = database.query(MySQLiteHelper.TABLE_TEAM+","+MySQLiteHelper.TABLE_TEAM_TO_SEASON,
+	    		allColumns,
+	    		MySQLiteHelper.TABLE_TEAM_TO_SEASON+"."+MySQLiteHelper.TS_COLUMN_SEASON + " = " + season + " AND " + MySQLiteHelper.TS_COLUMN_TEAM + " = " + MySQLiteHelper.TABLE_TEAM + "."+ MySQLiteHelper.TM_COLUMN_ID
+	    		+ " AND "+ MySQLiteHelper.TABLE_TEAM+"."+MySQLiteHelper.TM_COLUMN_ID + " != " + team,
+	    		null , null, null, null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {

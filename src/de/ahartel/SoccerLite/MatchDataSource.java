@@ -25,9 +25,7 @@ public class MatchDataSource {
       MySQLiteHelper.MA_COLUMN_AWAYTEAM,
       MySQLiteHelper.MA_COLUMN_HOMEGOALS,
       MySQLiteHelper.MA_COLUMN_AWAYGOALS,
-      MySQLiteHelper.MA_COLUMN_YEAR,
-      MySQLiteHelper.MA_COLUMN_MONTH,
-      MySQLiteHelper.MA_COLUMN_DAY
+      MySQLiteHelper.MA_COLUMN_DATE
       };
 
   public MatchDataSource(Context context) {
@@ -43,20 +41,6 @@ public class MatchDataSource {
   public void close() {
     dbHelper.close();
   }
- /*
-  private String dateToString(Date d)
-  {
-	  String finalDateTime = "";  
-	  int flags = 0;
-	  flags |= android.text.format.DateUtils.FORMAT_SHOW_TIME;
-	  flags |= android.text.format.DateUtils.FORMAT_SHOW_DATE;
-	  flags |= android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
-	  flags |= android.text.format.DateUtils.FORMAT_SHOW_YEAR;
-
-	  finalDateTime = android.text.format.DateUtils.formatDateTime(context,
-			  when + TimeZone.getDefault().getOffset(when), flags);
-}
-  */
   
   public List<Team> getAllTeams(long season_id)
   {
@@ -72,34 +56,71 @@ public class MatchDataSource {
     values.put(MySQLiteHelper.MA_COLUMN_HOMETEAM, home_team);
     values.put(MySQLiteHelper.MA_COLUMN_AWAYTEAM, away_team);
     values.put(MySQLiteHelper.MA_COLUMN_SEASON, season_id);
-    values.put(MySQLiteHelper.MA_COLUMN_YEAR, year);
-    values.put(MySQLiteHelper.MA_COLUMN_MONTH, month);
-    values.put(MySQLiteHelper.MA_COLUMN_DAY, day);
+    values.putNull(MySQLiteHelper.MA_COLUMN_HOMEGOALS);
+    values.putNull(MySQLiteHelper.MA_COLUMN_AWAYGOALS);
+    values.put(MySQLiteHelper.MA_COLUMN_DATE, year+"-"+month+"-"+day);
     
     long insertId = database.insert(MySQLiteHelper.TABLE_MATCH, null,
         values);
+    return getMatch(insertId);
+  }
+  
+  public Match createMatch(long season_id, long home_team, long away_team, long home_goals, long away_goals, int year, int month, int day) {
+	    ContentValues values = new ContentValues();
+	    values.put(MySQLiteHelper.MA_COLUMN_HOMETEAM, home_team);
+	    values.put(MySQLiteHelper.MA_COLUMN_AWAYTEAM, away_team);
+	    values.put(MySQLiteHelper.MA_COLUMN_SEASON, season_id);
+	    values.put(MySQLiteHelper.MA_COLUMN_HOMEGOALS, home_goals);
+	    values.put(MySQLiteHelper.MA_COLUMN_AWAYGOALS, away_goals);
+	    values.put(MySQLiteHelper.MA_COLUMN_DATE, year+"-"+month+"-"+day);
+	    
+	    long insertId = database.insert(MySQLiteHelper.TABLE_MATCH, null,
+	        values);
+	    return getMatch(insertId);
+	  }
+  
+  public Match getMatch(long id)
+  {
     Cursor cursor = database.query(MySQLiteHelper.TABLE_MATCH,
-        allColumns, MySQLiteHelper.MA_COLUMN_ID + " = " + insertId, null,
+        allColumns, MySQLiteHelper.MA_COLUMN_ID + " = " + id, null,
         null, null, null);
-    
-    Log.i("MatchDataSource",TextUtils.join(",",cursor.getColumnNames()));
+
     cursor.moveToFirst();
     Match newMatch = cursorToMatch(cursor);
     cursor.close();
     return newMatch;
   }
   
-//  public List<Match> getMatches(long season_id, long team_id) {
-//
-//	    Cursor cursor = database.query(MySQLiteHelper.TABLE_MATCHES,
-//	        allColumns, MySQLiteHelper.MA_COLUMN_SEASON + " = " + id, null,
-//	        null, null, null);
-//	    
-//	    cursor.moveToFirst();
-//	    Team newComment = cursorToTeam(cursor);
-//	    cursor.close();
-//	    return newComment;
-//	  }
+	public List<Match> getPastMatches(long team_id, boolean home_away, String date_string)
+	{
+		//String query_string = new String("strftime('%s',"+MySQLiteHelper.MA_COLUMN_DATE + ") < strftime('%s','" + date_string + "') AND ");
+		String query_string = new String(""+MySQLiteHelper.MA_COLUMN_DATE + " < '" + date_string + "' AND ");
+	    List<Match> matches = new ArrayList<Match>();
+	    
+		if (home_away == true)
+		{
+			query_string += MySQLiteHelper.MA_COLUMN_HOMETEAM + " = " + team_id;
+		}
+		else
+		{
+			query_string += MySQLiteHelper.MA_COLUMN_AWAYTEAM + " = " + team_id;
+		}
+
+		Cursor cursor = database.query(MySQLiteHelper.TABLE_MATCH,
+				allColumns, query_string, null,
+				null, null, null);
+		
+	    cursor.moveToFirst();
+	    while (!cursor.isAfterLast()) {
+	      Match s = cursorToMatch(cursor);
+	      matches.add(s);
+	      cursor.moveToNext();
+	    }
+	    // Make sure to close the cursor
+	    cursor.close();
+
+	    return matches;
+	}
 
   public void deleteSeason(Season s) {
     long id = s.getId();
@@ -134,7 +155,20 @@ public class MatchDataSource {
     m.setSeason(season_source.getSeason(cursor.getLong(1)));
     m.setHomeTeam(team_source.getTeam(cursor.getLong(2)));
     m.setAwayTeam(team_source.getTeam(cursor.getLong(3)));
-    m.setDate((int)cursor.getLong(4),(int)cursor.getLong(5),(int)cursor.getLong(6));
+    if (cursor.isNull(4))
+    	m.setHomeGoals(-1);
+    else
+    	m.setHomeGoals(cursor.getLong(4));
+    if (cursor.isNull(5))
+    	m.setAwayGoals(-1);
+    else
+    	m.setAwayGoals(cursor.getLong(5));
+    String date = new String(cursor.getString(6));	
+    String dates[] = date.split("-");
+    int year = Integer.parseInt(dates[0]);
+    int month = Integer.parseInt(dates[1]);
+    int day = Integer.parseInt(dates[2]);
+    m.setDate(year,month,day);
     return m;
   }
 } 

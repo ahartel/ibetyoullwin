@@ -94,7 +94,6 @@ public class TeamActivity extends FragmentActivity
                     .commit();
 
         } else {
-            //Log.i("TeamActivity", "ItemListActivity.onItemSelected() — id " + id);
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, MatchListActivity.class);

@@ -37,6 +37,6 @@ public class Season {
   // Will be used by the ArrayAdapter in the ListView
   @Override
   public String toString() {
-    return name;
+    return name;// + "(" + id + ")";
   }
 } 

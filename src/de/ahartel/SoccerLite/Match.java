@@ -2,6 +2,9 @@
 package de.ahartel.SoccerLite;
 
 import java.util.Calendar;
+import java.util.Locale;
+
+import android.util.Log;
 
 public class Match {
   private long id;
@@ -24,6 +27,16 @@ public class Match {
 	  this.season = s;
 	  this.date = Calendar.getInstance();
   }
+  
+  public String getDate()
+  {
+	  return date.get(Calendar.DAY_OF_MONTH) + "." + (date.get(Calendar.MONTH)+1) + "." + date.get(Calendar.YEAR);
+  }
+  
+  public String getDateString()
+  {
+	  return date.get(Calendar.YEAR) + "-" + date.get(Calendar.MONTH) + "-" + date.get(Calendar.DAY_OF_MONTH);
+  }
 
   public long getId() {
     return id;
@@ -33,9 +46,13 @@ public class Match {
     this.id = id;
   }
 
-  public Team getHome() {
+  public Team getHomeTeam() {
     return home_team;
   }
+  
+  public Team getAwayTeam() {
+	    return away_team;
+	  }
   
   public void setSeason(Season s) {
 	this.season = s;
@@ -48,6 +65,15 @@ public class Match {
   public void setAwayTeam(Team t) {
 		this.away_team = t;
 	  }
+  
+  public long getHomeGoals()
+  {
+	  return home_goals;
+  }
+	  
+  public long getAwayGoals() {
+	  return away_goals;
+  }
 
   public void setHomeGoals(long goals) {
     this.home_goals = goals;
@@ -64,6 +90,6 @@ public class Match {
   // Will be used by the ArrayAdapter in the ListView
   @Override
   public String toString() {
-    return home_team.toString() + ":" + away_team.toString();
+    return home_team.toString() + " vs. " + away_team.toString() + ", " + getDate();
   }
 } 

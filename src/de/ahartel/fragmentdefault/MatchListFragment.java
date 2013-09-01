@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -138,6 +139,7 @@ public class MatchListFragment extends ListFragment {
       Switch home_switch = (Switch) view.findViewById(R.id.home_away);
       home_switch.setTextOff("Home");
       home_switch.setTextOn("Away");
+      home_switch.setOnCheckedChangeListener((MatchListActivity)getActivity());
       
       return view;
     }

@@ -60,7 +60,8 @@ public class MatchListActivity extends FragmentActivity
         mSetYear = -1;
         mSetMonth = -1;
         mSetDay = -1;
-        
+        team_is_home = true;
+
         datasource = new MatchDataSource(this);
         datasource.open();
 
@@ -104,24 +105,6 @@ public class MatchListActivity extends FragmentActivity
         }
         
     }
-/*
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                // This ID represents the Home or Up button. In the case of this
-                // activity, the Up button is shown. Use NavUtils to allow users
-                // to navigate up one level in the application structure. For
-                // more details, see the Navigation pattern on Android Design:
-                //
-                // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-                //
-                NavUtils.navigateUpTo(this, new Intent(this, SeasonActivity.class));
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-    */
     
     /**
      * Callback method from {@link ItemListFragment.Callbacks}
@@ -142,12 +125,12 @@ public class MatchListActivity extends FragmentActivity
                     .commit();
 
         } else {
-            Log.i("ItemListActivity", "ItemListActivity.onItemSelected() — id " + id);
             // In single-pane mode, simply start the detail activity
             // for the selected item ID.
             Intent detailIntent = new Intent(this, MatchActivity.class);
             detailIntent.putExtra(MatchListFragment.ARG_SEASON_ID, mSeasonId);
-            detailIntent.putExtra(MatchListFragment.ARG_TEAM_ID, id);
+            detailIntent.putExtra(MatchListFragment.ARG_TEAM_ID, mTeamId);
+            detailIntent.putExtra(MatchFragment.ARG_MATCH_ID, id);
             startActivity(detailIntent);
         }
     }
@@ -155,7 +138,7 @@ public class MatchListActivity extends FragmentActivity
     // Callback from switch
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-       this.team_is_home = isChecked;
+    	this.team_is_home = !isChecked;
     }
     
     /*
@@ -172,7 +155,6 @@ public class MatchListActivity extends FragmentActivity
             int pos, long id) {
         // An item was selected. You can retrieve the selected item using
         selectedTeam = (Team)parent.getItemAtPosition(pos);
-        Log.i("MatchListActivity","selected Team " + selectedTeam.getName());
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
@@ -203,14 +185,24 @@ public class MatchListActivity extends FragmentActivity
     	catch (NullPointerException e) {
     		break;
     	}
-    	if (otherTeam >= 0)
+    	EditText home_goals = (EditText)findViewById(R.id.homeGoals);
+    	EditText away_goals = (EditText)findViewById(R.id.awayGoals);
+    	if (otherTeam >= 0 && mSetYear > 0 && mSetMonth >=0 && mSetDay >= 0)
     	{
     		// Save the new match to the database
     		if (team_is_home) {
-    			t = datasource.createMatch(mSeasonId,mTeamId,otherTeam,mSetYear,mSetMonth,mSetDay);
+
+    			if (home_goals.getText().length() > 0 && away_goals.getText().length() > 0)
+    				t = datasource.createMatch(mSeasonId,mTeamId,otherTeam,Integer.parseInt(home_goals.getText().toString()),Integer.parseInt(away_goals.getText().toString()),mSetYear,mSetMonth,mSetDay);
+    			else
+    				t = datasource.createMatch(mSeasonId,mTeamId,otherTeam,mSetYear,mSetMonth,mSetDay);
     		}
     		else {
-    			t = datasource.createMatch(mSeasonId,otherTeam,mTeamId,mSetYear,mSetMonth,mSetDay);
+
+    			if (home_goals.getText().length() > 0 && away_goals.getText().length() > 0)
+    				t = datasource.createMatch(mSeasonId,otherTeam,mTeamId,Integer.parseInt(home_goals.getText().toString()),Integer.parseInt(away_goals.getText().toString()),mSetYear,mSetMonth,mSetDay);
+    			else
+    				t = datasource.createMatch(mSeasonId,otherTeam,mTeamId,mSetYear,mSetMonth,mSetDay);
     		}
     		
     		listfrag.add(t);
