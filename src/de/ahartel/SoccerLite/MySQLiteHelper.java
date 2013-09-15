@@ -144,7 +144,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     db.execSQL("INSERT INTO " + TABLE_TEAM + " (" + TM_COLUMN_NAME + ") VALUES ( 'Eintracht Braunschweig')");
     db.execSQL("INSERT INTO " + TABLE_TEAM_TO_SEASON + " ("+ TS_COLUMN_TEAM + "," + TS_COLUMN_SEASON + ") VALUES (20,2)");
     
-    new ReceiveOpenLiga().execute("https://openligadb-json.heroku.com/api/teams_by_league_saison?league_saison=2013&league_shortcut=bl1");
+    new ReceiveOpenLiga().execute("https://openligadb-json.heroku.com/api/teams_by_league_saison");
+    Log.i("MySQLiteHelper","WTF");
   }
 
 } 
