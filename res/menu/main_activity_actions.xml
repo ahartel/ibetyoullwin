@@ -5,4 +5,8 @@
           android:icon="@drawable/ic_action_content_discard"
           android:title="@string/action_wipe"
           />
+    <item android:id="@+id/action_load"
+          android:icon="@drawable/ic_action_content_discard"
+          android:title="@string/action_load"
+          />
 </menu>

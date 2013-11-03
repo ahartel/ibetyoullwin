@@ -13,8 +13,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 public class MatchDataSource {
-	private SeasonDataSource season_source;
-	private TeamDataSource team_source;
+	public SeasonDataSource season_source;
+	public TeamDataSource team_source;
 
   // Database fields
   private SQLiteDatabase database;
@@ -25,7 +25,8 @@ public class MatchDataSource {
       MySQLiteHelper.MA_COLUMN_AWAYTEAM,
       MySQLiteHelper.MA_COLUMN_HOMEGOALS,
       MySQLiteHelper.MA_COLUMN_AWAYGOALS,
-      MySQLiteHelper.MA_COLUMN_DATE
+      MySQLiteHelper.MA_COLUMN_DATE,
+      MySQLiteHelper.MA_COLUMN_FINISHED
       };
 
   public MatchDataSource(Context context) {
@@ -50,6 +51,22 @@ public class MatchDataSource {
   public List<Team> getAllTeamsNotThis(long season_id, long team_id) {
 	  return team_source.getAllTeamsNotThis(season_id,team_id);
   }
+  
+  public Match createMatch(long season_id, long match_id, long home_team, long away_team, int home_goals, int away_goals, String date, boolean finished) {
+	    ContentValues values = new ContentValues();
+	    values.put(MySQLiteHelper.MA_COLUMN_ID, match_id);
+	    values.put(MySQLiteHelper.MA_COLUMN_HOMETEAM, home_team);
+	    values.put(MySQLiteHelper.MA_COLUMN_AWAYTEAM, away_team);
+	    values.put(MySQLiteHelper.MA_COLUMN_SEASON, season_id);
+	    values.put(MySQLiteHelper.MA_COLUMN_HOMEGOALS, home_goals);
+	    values.put(MySQLiteHelper.MA_COLUMN_AWAYGOALS, away_goals);
+	    values.put(MySQLiteHelper.MA_COLUMN_DATE, date);
+	    values.put(MySQLiteHelper.MA_COLUMN_FINISHED, finished);
+	    
+	    long insertId = database.insert(MySQLiteHelper.TABLE_MATCH, null,
+	        values);
+	    return getMatch(insertId);
+	  }
 
   public Match createMatch(long season_id, long home_team, long away_team, int year, int month, int day) {
     ContentValues values = new ContentValues();
@@ -79,6 +96,18 @@ public class MatchDataSource {
 	    return getMatch(insertId);
 	  }
   
+  public boolean existsMatch(long id)
+  {
+    Cursor cursor = database.query(MySQLiteHelper.TABLE_MATCH,
+        allColumns, MySQLiteHelper.MA_COLUMN_ID + " = " + id, null,
+        null, null, null);
+
+    if (cursor.getCount() > 0)
+    	return true;
+    else
+    	return false;
+  }
+  
   public Match getMatch(long id)
   {
     Cursor cursor = database.query(MySQLiteHelper.TABLE_MATCH,
@@ -94,7 +123,7 @@ public class MatchDataSource {
 	public List<Match> getPastMatches(long team_id, boolean home_away, String date_string)
 	{
 		//String query_string = new String("strftime('%s',"+MySQLiteHelper.MA_COLUMN_DATE + ") < strftime('%s','" + date_string + "') AND ");
-		String query_string = new String(""+MySQLiteHelper.MA_COLUMN_DATE + " < '" + date_string + "' AND ");
+		String query_string = new String(MySQLiteHelper.MA_COLUMN_FINISHED+" = 1 AND "+MySQLiteHelper.MA_COLUMN_DATE + " < '" + date_string + "' AND ");
 	    List<Match> matches = new ArrayList<Match>();
 	    
 		if (home_away == true)
@@ -124,7 +153,7 @@ public class MatchDataSource {
 
   public void deleteSeason(Season s) {
     long id = s.getId();
-    System.out.println("Comment deleted with id: " + id);
+    //System.out.println("Comment deleted with id: " + id);
     database.delete(MySQLiteHelper.TABLE_TEAM, MySQLiteHelper.TM_COLUMN_ID
         + " = " + id, null);
   }
@@ -148,6 +177,25 @@ public class MatchDataSource {
     cursor.close();
     return matches;
   }
+  
+  public List<Match> getNextMatches(long season) {
+	    List<Match> matches = new ArrayList<Match>();
+
+	    Cursor cursor = database.query(MySQLiteHelper.TABLE_MATCH, allColumns,
+	    		MySQLiteHelper.MA_COLUMN_SEASON + " = " + season
+	    		+ " AND " + MySQLiteHelper.MA_COLUMN_FINISHED + " = 0",
+	    		null, null, null, MySQLiteHelper.MA_COLUMN_DATE+" ASC ", "20");
+
+	    cursor.moveToFirst();
+	    while (!cursor.isAfterLast()) {
+	      Match m = cursorToMatch(cursor);
+	      matches.add(m);
+	      cursor.moveToNext();
+	    }
+	    // Make sure to close the cursor
+	    cursor.close();
+	    return matches;
+	  }
 
   private Match cursorToMatch(Cursor cursor) {
     Match m = new Match();
@@ -163,12 +211,17 @@ public class MatchDataSource {
     	m.setAwayGoals(-1);
     else
     	m.setAwayGoals(cursor.getLong(5));
-    String date = new String(cursor.getString(6));	
-    String dates[] = date.split("-");
+    String date = new String(cursor.getString(6));
+    String date_time[] = date.split("T");
+    String dates[] = date_time[0].split("-");
     int year = Integer.parseInt(dates[0]);
     int month = Integer.parseInt(dates[1]);
     int day = Integer.parseInt(dates[2]);
-    m.setDate(year,month,day);
+    m.setDate(year,month-1,day);
     return m;
+  }
+  
+  public void drop_recreate_db() {
+	  dbHelper.drop_recreate(database);
   }
 } 

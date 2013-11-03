@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -95,6 +98,8 @@ public class MatchListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        setHasOptionsMenu(true);
+        
         values = new ArrayList<Match>();
 
         // TODO: replace with a real list adapter.
@@ -124,6 +129,7 @@ public class MatchListFragment extends ListFragment {
       
       // opponent spinner
       teams = new ArrayList<Team>();
+      /*
       // Create an ArrayAdapter using the string array and a default spinner layout
       spinner_adapter = new ArrayAdapter<Team>(getActivity(),
   	        android.R.layout.simple_spinner_item,teams);
@@ -140,7 +146,7 @@ public class MatchListFragment extends ListFragment {
       home_switch.setTextOff("Home");
       home_switch.setTextOn("Away");
       home_switch.setOnCheckedChangeListener((MatchListActivity)getActivity());
-      
+      */
       return view;
     }
 
@@ -213,6 +219,29 @@ public class MatchListFragment extends ListFragment {
         }
 
         mActivatedPosition = position;
+    }
+    
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    	super.onCreateOptionsMenu(menu,inflater);
+        // Inflate the menu items for use in the action bar
+        inflater.inflate(R.menu.main_activity_actions, menu);
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+    	MatchListActivity act = (MatchListActivity)getActivity();
+        switch (item.getItemId()) {
+            case R.id.action_wipe:
+                act.drop_recreate_db();
+                return true;
+            case R.id.action_load:
+                act.update_database();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
  
     public void add(Match m)

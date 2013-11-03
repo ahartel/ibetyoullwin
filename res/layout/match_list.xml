@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+<!--
     <GridLayout
         android:id="@+id/group"
         android:layout_width="wrap_content"
@@ -47,6 +48,7 @@
             android:onClick="onClick"/>
         
     </GridLayout>
+    -->
     
         <ListView
         android:id="@android:id/list"

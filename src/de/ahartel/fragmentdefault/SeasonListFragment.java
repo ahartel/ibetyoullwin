@@ -84,8 +84,6 @@ public class SeasonListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        setHasOptionsMenu(true);
-        
         values = new ArrayList<Season>();
 
         // TODO: replace with a real list adapter.
@@ -156,27 +154,6 @@ public class SeasonListFragment extends ListFragment {
         if (mActivatedPosition != ListView.INVALID_POSITION) {
             // Serialize and persist the activated item position.
             outState.putInt(STATE_ACTIVATED_POSITION, mActivatedPosition);
-        }
-    }
-    
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-    	super.onCreateOptionsMenu(menu,inflater);
-        // Inflate the menu items for use in the action bar
-        inflater.inflate(R.menu.main_activity_actions, menu);
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
-        switch (item.getItemId()) {
-            case R.id.action_wipe:
-                SeasonActivity act = (SeasonActivity)getActivity();
-                act.drop_recreate_db();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
         }
     }
 

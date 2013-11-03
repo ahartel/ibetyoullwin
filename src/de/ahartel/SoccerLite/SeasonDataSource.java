@@ -77,6 +77,30 @@ public class SeasonDataSource {
 	    cursor.close();
 	    return newComment;
 	  }
+  
+  public boolean existsSeason(String name)
+  {
+	    Cursor cursor = database.query(MySQLiteHelper.TABLE_SEASON,
+	        allColumns, MySQLiteHelper.SN_COLUMN_NAME + " = " + name, null,
+	        null, null, null);
+	    
+	    if (cursor.getCount() > 0)
+	    	return true;
+	    else
+	    	return false;
+	  }
+  
+  public Season getSeasonByName(String name) {
+
+	    Cursor cursor = database.query(MySQLiteHelper.TABLE_SEASON,
+	        allColumns, MySQLiteHelper.SN_COLUMN_NAME + " = " + name, null,
+	        null, null, null);
+	    
+	    cursor.moveToFirst();
+	    Season newComment = cursorToSeason(cursor);
+	    cursor.close();
+	    return newComment;
+	  }
 
   public void deleteSeason(Season s) {
     long id = s.getId();

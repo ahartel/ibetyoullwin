@@ -4,6 +4,7 @@ import java.util.Calendar;
 
 import de.ahartel.SoccerLite.Match;
 import de.ahartel.SoccerLite.MatchDataSource;
+import de.ahartel.SoccerLite.ReceiveOpenLiga;
 import de.ahartel.SoccerLite.Team;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -55,7 +56,7 @@ public class MatchListActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_match_list);
         
-        mSeasonId = -1;
+        mSeasonId = 1;
         mTeamId = -1;
         mSetYear = -1;
         mSetMonth = -1;
@@ -90,18 +91,18 @@ public class MatchListActivity extends FragmentActivity
                     .add(R.id.item_detail_container, fragment)
                     .commit();
             */
-            mSeasonId = getIntent().getLongExtra(MatchListFragment.ARG_SEASON_ID,0);
-            mTeamId = getIntent().getLongExtra(MatchListFragment.ARG_TEAM_ID,0);
+//            mSeasonId = getIntent().getLongExtra(MatchListFragment.ARG_SEASON_ID,0);
+//            mTeamId = getIntent().getLongExtra(MatchListFragment.ARG_TEAM_ID,0);
         }
 
-        if (mSeasonId >= 0 && mTeamId >= 0)
+        if (mSeasonId >= 0)
         {
         	MatchListFragment listfrag = ((MatchListFragment) getSupportFragmentManager()
         			.findFragmentById(R.id.match_list_container));
         	
-        	listfrag.setValues(datasource.getAllMatches(mSeasonId,mTeamId));
+        	listfrag.setValues(datasource.getNextMatches(mSeasonId));
         	
-        	listfrag.setTeams(datasource.getAllTeamsNotThis(mSeasonId,mTeamId));
+        	//listfrag.setTeams(datasource.getAllTeamsNotThis(mSeasonId,mTeamId));
         }
         
     }
@@ -177,6 +178,7 @@ public class MatchListActivity extends FragmentActivity
 
       Match t = null;
       switch (view.getId()) {
+      /*
       case R.id.add:
     	long otherTeam = -1;
     	try {
@@ -208,7 +210,8 @@ public class MatchListActivity extends FragmentActivity
     		listfrag.add(t);
     	}
         break;
-        /*
+        */
+      /*
       case R.id.delete:
         if (listfrag.getCount() > 0) {
           s = (Season) listfrag.front();
@@ -218,6 +221,15 @@ public class MatchListActivity extends FragmentActivity
         break;
         */
       }
+    }
+    
+    public void drop_recreate_db() {
+    	datasource.drop_recreate_db();
+    }
+    
+    public void update_database() {
+    	new ReceiveOpenLiga().execute(datasource,"https://openligadb-json.heroku.com/api/","2013");
+    	new ReceiveOpenLiga().execute(datasource,"https://openligadb-json.heroku.com/api/","2012");
     }
 
     @Override
