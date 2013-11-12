@@ -14,7 +14,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -90,103 +92,147 @@ public class MatchActivity extends FragmentActivity {
             mSeasonId = getIntent().getLongExtra(MatchListFragment.ARG_SEASON_ID,0);
             mTeamId = getIntent().getLongExtra(MatchListFragment.ARG_TEAM_ID,0);
             long matchId = getIntent().getLongExtra(MatchFragment.ARG_MATCH_ID,0);
+            
+            calculate_odds(matchId);
 
-	        if (matchId >= 0)
-	        {
-	        	Match mMatch = datasource.getMatch(matchId);
-	        	TextView matchName = (TextView) findViewById(R.id.MatchName);
-	        	matchName.setText(mMatch.toString());
-	        	/*
-	        	 * print score to textview
-	        	 */
-        		TextView score = (TextView) findViewById(R.id.Score);
-	        	if (mMatch.getHomeGoals() >= 0 && mMatch.getAwayGoals() >= 0)
-	        		score.setText("Score: "+mMatch.getHomeGoals() + " : " + mMatch.getAwayGoals());
-	        	else
-	        		score.setText("Score: unset");
-	        	/*
-	        	 * get past matches
-	        	 */
-	        	List<Match> matches_home = datasource.getPastMatches(mMatch.getHomeTeam().getId(),true,mMatch.getDateString());
-	        	List<Match> matches_away = datasource.getPastMatches(mMatch.getAwayTeam().getId(),false,mMatch.getDateString());
-	        	/*
-	        	 * Calculate average goals
-	        	 */
-	        	float home_avg_goals = 0;
-	        	float away_avg_goals = 0;
-	        	
-	        	Iterator<Match> iterator = matches_home.iterator();
-	        	while (iterator.hasNext()) {
-	        		home_avg_goals += iterator.next().getHomeGoals();
-	        	}
-	        	home_avg_goals /= matches_home.size();
-	        	
-	        	iterator = matches_away.iterator();
-	        	while (iterator.hasNext()) {
-	        		away_avg_goals += iterator.next().getAwayGoals();
-	        	}
-	        	away_avg_goals /= matches_away.size();
-	        	/*
-	        	 * Write average goals to textview
-	        	 */
-	        	TextView home_avg = (TextView) findViewById(R.id.HomeAverage);
-	        	if (matches_home.size() > 0 )	        		
-	        		home_avg.setText("Home goals avg." + home_avg_goals);
-	        	else
-	        		home_avg.setText("No matches found");
-	        	
-	        	TextView away_avg = (TextView) findViewById(R.id.AwayAverage);
-	        	if (matches_away.size() > 0 )	        		
-	        		away_avg.setText("Away goals avg." + away_avg_goals);
-	        	else
-	        		away_avg.setText("No matches found");
+            EditText editTextHome = (EditText) findViewById(R.id.enterQuoteHome);
+            EditText editTextDraw = (EditText) findViewById(R.id.enterQuoteDraw);
+            EditText editTextAway = (EditText) findViewById(R.id.enterQuoteAway);
 
-	        	if (matches_home.size() > 0  && matches_away.size() > 0)
-	        	{
-		        	double home_prob[] = new double[6];
-		        	double away_prob[] = new double[6];
-		        	// Poisson distribution
-		        	for (int i=0; i<6; i++)
-		        	{
-		        		home_prob[i] = Math.exp(-home_avg_goals)*Math.pow(home_avg_goals,i)/(double)factorial(i);
-		        		away_prob[i] = Math.exp(-away_avg_goals)*Math.pow(away_avg_goals,i)/(double)factorial(i);
-		        	}
-		        	TextView target = (TextView) findViewById(R.id.HomePoisson);
-		        	target.setText(String.format("%.02f, %.02f, %.02f, %.02f, %.02f, %.02f",home_prob[0],home_prob[1],home_prob[2],home_prob[3],home_prob[4],home_prob[5]));
-		        	target = (TextView) findViewById(R.id.AwayPoisson);
-		        	target.setText(String.format("%.02f, %.02f, %.02f, %.02f, %.02f, %.02f",away_prob[0],away_prob[1],away_prob[2],away_prob[3],away_prob[4],away_prob[5]));
-		        	
-		        	double win_home = 0;
-		        	double win_away = 0;
-		        	double win_none = 0;
-		        	for (int i=0; i<6; i++)
-		        	{
-		        		for (int j=0; j<6; j++)
-		        		{
-		        			double product = home_prob[i]*away_prob[j];
-		        			if (i==j)
-		        				win_none += product;
-		        			else if (i < j)
-		        				win_home += product;
-		        			else if (j < i)
-		        				win_away += product;
-		        			
-		        			target = (TextView) findViewById(getResources().getIdentifier("text"+i+j,"id",getPackageName()));
-		        			target.setText(String.format("%.02f", product*100.0)+"%");
-		        		}
-		        	}
-		        	win_none /= (win_home+win_away+win_none);
-		        	win_home /= (win_home+win_away+win_none);
-		        	win_away /= (win_home+win_away+win_none);
-		        	
-		        	//TextView prob = (TextView) findViewById(R.id.ResultProb);
-		        	//prob.setText(win_home+" + "+win_none+" + "+win_away+" = "+(win_away+win_home+win_none));
-		        	TextView quote = (TextView) findViewById(R.id.ResultQuote);
-		        	quote.setText(String.format("%.02f - %.02f - %.02f",1./win_home,1./win_none,1./win_away));
-		        }
-	        }
+            TextWatcher tw = new TextWatcher() {
+
+              public void afterTextChanged(Editable s) {
+
+                // you can call or do what you want with your EditText here
+                calculate_stake(); 
+
+              }
+
+              public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+              public void onTextChanged(CharSequence s, int start, int before, int count) {}
+           };
+            
+           editTextHome.addTextChangedListener(tw);
+           editTextDraw.addTextChangedListener(tw);
+           editTextAway.addTextChangedListener(tw);
+	        
         }
     }
+	
+	void calculate_stake()
+	{
+		
+	}
+	
+	void calculate_odds(long matchId)
+	{
+		if (matchId >= 0)
+	    {
+	    	Match mMatch = datasource.getMatch(matchId);
+	    	TextView matchName = (TextView) findViewById(R.id.MatchName);
+	    	matchName.setText(mMatch.toString());
+	    	/*
+	    	 * print score to textview
+	    	 */
+			TextView score = (TextView) findViewById(R.id.Score);
+	    	if (mMatch.getHomeGoals() >= 0 && mMatch.getAwayGoals() >= 0)
+	    		score.setText("Score: "+mMatch.getHomeGoals() + " : " + mMatch.getAwayGoals());
+	    	else
+	    		score.setText("Score: unset");
+	    	/*
+	    	 * get past matches
+	    	 */
+	    	List<Match> matches_home = datasource.getPastMatches(mMatch.getHomeTeam().getId(),true,mMatch.getDateString());
+	    	List<Match> matches_away = datasource.getPastMatches(mMatch.getAwayTeam().getId(),false,mMatch.getDateString());
+	    	/*
+	    	 * get widget pointers
+	    	 */
+	    	TextView home_avg = (TextView) findViewById(R.id.HomeAverage);
+	    	TextView away_avg = (TextView) findViewById(R.id.AwayAverage);
+	    	/*
+	    	 * Calculate average goals
+	    	 */
+	    	float home_avg_goals = 0;
+	    	float away_avg_goals = 0;
+	    	
+	    	Iterator<Match> iterator = matches_home.iterator();
+	    	while (iterator.hasNext()) {
+	    		home_avg_goals += iterator.next().getHomeGoals();
+	    	}
+	    	home_avg_goals /= matches_home.size();
+	    	
+	    	iterator = matches_away.iterator();
+	    	while (iterator.hasNext()) {
+	    		away_avg_goals += iterator.next().getAwayGoals();
+	    	}
+	    	away_avg_goals /= matches_away.size();
+	    	
+	    	/*
+	    	 * Write average goals to textview
+	    	 */
+	    	if (matches_home.size() > 0 )
+	    		//home_avg.setText("Home goals avg." + home_avg_goals + "/" + matches_home.size() + " = " + home_avg_goals/matches_home.size());
+	    		home_avg.setText("Home goals avg." + home_avg_goals);
+	    	else
+	    		home_avg.setText("No matches found");
+	    	
+	    	
+	    	if (matches_away.size() > 0 )
+	    		//away_avg.setText("Away goals avg." + away_avg_goals + "/" + matches_away.size() + " = " + away_avg_goals/matches_away.size());
+	    		away_avg.setText("Away goals avg." + away_avg_goals);
+	    	else
+	    		away_avg.setText("No matches found");
+	
+	    	if (matches_home.size() > 0  && matches_away.size() > 0)
+	    	{
+	        	double home_prob[] = new double[6];
+	        	double away_prob[] = new double[6];
+	        	// Poisson distribution
+	        	for (int i=0; i<6; i++)
+	        	{
+	        		home_prob[i] = Math.exp(-home_avg_goals)*Math.pow(home_avg_goals,i)/(double)factorial(i);
+	        		away_prob[i] = Math.exp(-away_avg_goals)*Math.pow(away_avg_goals,i)/(double)factorial(i);
+	        	}
+	        	//TextView target = (TextView) findViewById(R.id.HomePoisson);
+	        	//target.setText(String.format("%.02f, %.02f, %.02f, %.02f, %.02f, %.02f",home_prob[0],home_prob[1],home_prob[2],home_prob[3],home_prob[4],home_prob[5]));
+	        	//target = (TextView) findViewById(R.id.AwayPoisson);
+	        	//target.setText(String.format("%.02f, %.02f, %.02f, %.02f, %.02f, %.02f",away_prob[0],away_prob[1],away_prob[2],away_prob[3],away_prob[4],away_prob[5]));
+	        	
+	        	double win_home = 0;
+	        	double win_away = 0;
+	        	double win_none = 0;
+	        	for (int i=0; i<6; i++)
+	        	{
+	        		for (int j=0; j<6; j++)
+	        		{
+	        			double product = home_prob[i]*away_prob[j];
+	        			if (i==j)
+	        				win_none += product;
+	        			else if (i < j)
+	        				win_away += product;
+	        			else if (j < i)
+	        				win_home += product;
+	        			
+	        			//target = (TextView) findViewById(getResources().getIdentifier("text"+i+j,"id",getPackageName()));
+	        			//target.setText(String.format("%.02f", product*100.0)+"%");
+	        		}
+	        	}
+	        	win_none /= (win_home+win_away+win_none);
+	        	win_home /= (win_home+win_away+win_none);
+	        	win_away /= (win_home+win_away+win_none);
+	        	
+	        	//TextView prob = (TextView) findViewById(R.id.ResultProb);
+	        	//prob.setText(win_home+" + "+win_none+" + "+win_away+" = "+(win_away+win_home+win_none));
+	        	TextView quote = (TextView) findViewById(R.id.resultQuoteHome);
+	        	quote.setText(String.format("%.02f",1./win_home));
+	        	quote = (TextView) findViewById(R.id.resultQuoteDraw);
+	        	quote.setText(String.format("%.02f",1./win_none));
+	        	quote = (TextView) findViewById(R.id.resultQuoteAway);
+	        	quote.setText(String.format("%.02f",1./win_away));
+	        }
+	    }
+	}
 	
 	public int factorial(int i)
 	{

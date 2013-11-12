@@ -12,18 +12,30 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import de.ahartel.fragmentdefault.R;
 
 import com.google.gson.Gson;
-//import com.google.gson.annotations.SerializedName;
 
-public class ReceiveOpenLiga extends AsyncTask<Object, Void, StreamSeasonContainer> {
+public class ReceiveOpenLiga extends AsyncTask<Object, Integer, StreamSeasonContainer> {
 
     private Exception exception;
     private MatchDataSource datasource;
     private String base_url;
     private String season_year;
+    private Context mContext;
+    private ProgressBar mProgress;
+    
+    public ReceiveOpenLiga(Context context)
+    {
+    	mContext = context;
+    	Activity act = (Activity) mContext;
+    	mProgress = (ProgressBar) act.findViewById(R.id.ProgressBar);
+    }
 
     protected StreamSeasonContainer doInBackground(Object... input) {
     	StreamSeasonContainer season = new StreamSeasonContainer();
@@ -35,9 +47,13 @@ public class ReceiveOpenLiga extends AsyncTask<Object, Void, StreamSeasonContain
  
     	season.groups = getGroups(base_url+"/avail_groups?league_saison="+season_year+"&league_shortcut=bl1");
     	
+    	int groups_size = season.groups.group.size();
+    	int cnt = 0;
     	for (StreamGroup g : season.groups.group)
     	{
     		season.matches.addAll(getMatches(base_url+"/matchdata_by_group_league_saison?group_order_id="+g.group_order_id+"&league_saison="+season_year+"&league_shortcut=bl1").matchdata);
+    		cnt++;
+    		publishProgress(groups_size,cnt);
     	}
     	
     	return season;
@@ -128,12 +144,25 @@ public class ReceiveOpenLiga extends AsyncTask<Object, Void, StreamSeasonContain
 
     	return stc;
     }
+    
+    @Override
+    protected void onPreExecute()
+    {
+    	mProgress.setVisibility(View.VISIBLE);
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+    	mProgress.setMax(progress[0]);
+        mProgress.setProgress(progress[1]);
+    }
 
     protected void onPostExecute(StreamSeasonContainer season) {
         // TODO: check this.exception 
         // TODO: do something with the feed
     	Season insert_season;
     	datasource.open();
+    	datasource.drop_recreate_db();
+    	
     	if (!datasource.season_source.existsSeason(season_year))
     		insert_season = datasource.season_source.createSeason(season_year, null);
     	else
@@ -153,5 +182,8 @@ public class ReceiveOpenLiga extends AsyncTask<Object, Void, StreamSeasonContain
     		if (!datasource.existsMatch(m.match_id))
     			datasource.createMatch(insert_season.getId(),m.match_id,m.id_team1,m.id_team2,m.points_team1,m.points_team2,m.match_date_time_utc,m.match_is_finished);
     	}
+    	
+
+    	mProgress.setVisibility(View.GONE);
     }
 }

@@ -222,6 +222,6 @@ public class MatchDataSource {
   }
   
   public void drop_recreate_db() {
-	  dbHelper.drop_recreate(database);
+	  dbHelper.drop_recreate_except_odds(database);
   }
 } 

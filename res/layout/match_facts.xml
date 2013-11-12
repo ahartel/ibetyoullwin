@@ -28,6 +28,7 @@
 		android:id="@+id/AwayPoisson"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content" />
+		<!--
         <TableLayout
         	android:id="@+id/tableLayout1"
     		android:layout_width="wrap_content"
@@ -271,12 +272,61 @@
                 	android:layout_width="wrap_content" />
     		</TableRow>
     	</TableLayout>
+    	-->
     <TextView
 		android:id="@+id/ResultProb"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content" />
-	<TextView
-		android:id="@+id/ResultQuote"
+	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content" />
+    	android:layout_height="wrap_content"
+		android:orientation="horizontal" >
+
+		<TextView
+		    android:id="@+id/resultQuoteHome"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1" >
+		</TextView>
+
+		<TextView
+		    android:id="@+id/resultQuoteDraw"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1" />
+
+		<TextView
+		    android:id="@+id/resultQuoteAway"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1" />
+		
+	</LinearLayout>
+	<LinearLayout
+		android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+		android:orientation="horizontal" >
+
+		<EditText
+		    android:id="@+id/enterQuoteHome"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1" >
+
+		    <requestFocus />
+		</EditText>
+
+		<EditText
+		    android:id="@+id/enterQuoteDraw"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1" />
+
+		<EditText
+		    android:id="@+id/enterQuoteAway"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1" />
+		
+	</LinearLayout>
 </LinearLayout>

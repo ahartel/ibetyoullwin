@@ -233,9 +233,11 @@ public class MatchListFragment extends ListFragment {
         // Handle presses on the action bar items
     	MatchListActivity act = (MatchListActivity)getActivity();
         switch (item.getItemId()) {
+        /*
             case R.id.action_wipe:
                 act.drop_recreate_db();
                 return true;
+                */
             case R.id.action_load:
                 act.update_database();
                 return true;

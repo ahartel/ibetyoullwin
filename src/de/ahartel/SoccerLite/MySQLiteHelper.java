@@ -32,9 +32,16 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
   public static final String TS_COLUMN_ID = "_id";
   public static final String TS_COLUMN_TEAM = "team_id";
   public static final String TS_COLUMN_SEASON = "season_id";
+  
+  public static final String TABLE_MATCH_ODDS = "match_odds";
+  public static final String MO_COLUMN_ID = "_id";
+  public static final String MO_COLUMN_TEAM = "team_id";
+  public static final String MO_COLUMN_HOME = "home_odds";
+  public static final String MO_COLUMN_DRAW = "draw_odds";
+  public static final String MO_COLUMN_AWAY = "away_odds";
 
   private static final String DATABASE_NAME = "SoccerLite.db";
-  private static final int DATABASE_VERSION = 19;
+  private static final int DATABASE_VERSION = 20;
 
   // Database creation sql statement
   private static final String DATABASE_CREATE_SEASON = "create table "
@@ -59,6 +66,12 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 	      + TABLE_TEAM_TO_SEASON + "(" + TS_COLUMN_ID
 	      + " integer primary key autoincrement, " + TS_COLUMN_TEAM
 	      + " integer not null, " + TS_COLUMN_SEASON + " integer not null);";
+  
+  private static final String DATABASE_CREATE_MATCH_ODDS = "create table if not exists "
+	      + TABLE_MATCH_ODDS + "(" + MO_COLUMN_ID
+	      + " integer primary key autoincrement, " + MO_COLUMN_TEAM
+	      + " integer not null, " + MO_COLUMN_HOME + " float not null, "
+	      + MO_COLUMN_DRAW + " float not null, " + MO_COLUMN_AWAY + " float not null);";
 
   public MySQLiteHelper(Context context) {
     super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -70,6 +83,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     database.execSQL(DATABASE_CREATE_TEAM);
     database.execSQL(DATABASE_CREATE_MATCH);
     database.execSQL(DATABASE_CREATE_TEAM_TO_SEASON);
+    database.execSQL(DATABASE_CREATE_MATCH_ODDS);
   }
 
   @Override
@@ -77,16 +91,25 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     Log.w(MySQLiteHelper.class.getName(),
         "Upgrading database from version " + oldVersion + " to "
             + newVersion + ", which will destroy all old data");
-    drop_recreate(db);
+    drop_recreate_all(db);
   }
   
-  public void drop_recreate(SQLiteDatabase db) {
+  public void drop_recreate_all(SQLiteDatabase db) {
     db.execSQL("DROP TABLE IF EXISTS " + TABLE_SEASON);
     db.execSQL("DROP TABLE IF EXISTS " + TABLE_TEAM);
     db.execSQL("DROP TABLE IF EXISTS " + TABLE_MATCH);
     db.execSQL("DROP TABLE IF EXISTS " + TABLE_TEAM_TO_SEASON);
+    db.execSQL("DROP TABLE IF EXISTS " + TABLE_MATCH_ODDS);
     onCreate(db);
-    
+  }
+  
+  public void drop_recreate_except_odds(SQLiteDatabase db)
+  {
+	  db.execSQL("DROP TABLE IF EXISTS " + TABLE_SEASON);
+	  db.execSQL("DROP TABLE IF EXISTS " + TABLE_TEAM);
+	  db.execSQL("DROP TABLE IF EXISTS " + TABLE_MATCH);
+	  db.execSQL("DROP TABLE IF EXISTS " + TABLE_TEAM_TO_SEASON);
+	  onCreate(db);
   }
 
 } 

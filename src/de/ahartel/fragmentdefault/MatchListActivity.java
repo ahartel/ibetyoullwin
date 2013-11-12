@@ -15,6 +15,7 @@ import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -67,7 +68,7 @@ public class MatchListActivity extends FragmentActivity
         datasource.open();
 
         // Show the Up button in the action bar.
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);        
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -228,8 +229,10 @@ public class MatchListActivity extends FragmentActivity
     }
     
     public void update_database() {
-    	new ReceiveOpenLiga().execute(datasource,"https://openligadb-json.heroku.com/api/","2013");
-    	new ReceiveOpenLiga().execute(datasource,"https://openligadb-json.heroku.com/api/","2012");
+    	ReceiveOpenLiga rcv2013 = new ReceiveOpenLiga(this);
+    	rcv2013.execute(datasource,"https://openligadb-json.heroku.com/api/","2013");
+    	ReceiveOpenLiga rcv2012 = new ReceiveOpenLiga(this);
+    	rcv2012.execute(datasource,"https://openligadb-json.heroku.com/api/","2012");
     }
 
     @Override
