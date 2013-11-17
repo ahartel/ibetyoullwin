@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -43,6 +44,16 @@ public class MatchActivity extends FragmentActivity {
 	private long mSeasonId;
 	private long mTeamId;
 	private Match mMatch;
+	
+	double MAX_BET = 10.0;
+	
+	private EditText editTextHome;
+	private EditText editTextDraw;
+	private EditText editTextAway;
+	
+	double win_home;
+	double win_none;
+	double win_away;
 
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -93,11 +104,25 @@ public class MatchActivity extends FragmentActivity {
             mTeamId = getIntent().getLongExtra(MatchListFragment.ARG_TEAM_ID,0);
             long matchId = getIntent().getLongExtra(MatchFragment.ARG_MATCH_ID,0);
             
+            win_home = 0.0;
+            win_none = 0.0;
+            win_away = 0.0;
+            
             calculate_odds(matchId);
+            
+            double[] book_odds = get_book_odds();
 
-            EditText editTextHome = (EditText) findViewById(R.id.enterQuoteHome);
-            EditText editTextDraw = (EditText) findViewById(R.id.enterQuoteDraw);
-            EditText editTextAway = (EditText) findViewById(R.id.enterQuoteAway);
+            editTextHome = (EditText) findViewById(R.id.enterQuoteHome);
+            editTextHome.setInputType( InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            if (book_odds[0] > 0.0) editTextHome.setText(book_odds[0]+"");
+            editTextDraw = (EditText) findViewById(R.id.enterQuoteDraw);
+            editTextDraw.setInputType( InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            if (book_odds[1] > 0.0) editTextDraw.setText(book_odds[1]+"");
+            editTextAway = (EditText) findViewById(R.id.enterQuoteAway);
+            editTextAway.setInputType( InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            if (book_odds[2] > 0.0) editTextAway.setText(book_odds[2]+"");
+            
+            calculate_stake();
 
             TextWatcher tw = new TextWatcher() {
 
@@ -120,16 +145,88 @@ public class MatchActivity extends FragmentActivity {
         }
     }
 	
+	double[] get_book_odds()
+	{
+		return datasource.get_book_odds(mMatch.getId());
+	}
+	
 	void calculate_stake()
 	{
+		float home = (float)0.0;
+		float draw = (float) 0.0;
+		float away = (float)0.0;
 		
+		try {
+			home = Float.valueOf(editTextHome.getText().toString());
+		}
+		catch (java.lang.NumberFormatException e) {}
+		
+		try
+		{
+			draw = Float.valueOf(editTextDraw.getText().toString());
+		}
+		catch (java.lang.NumberFormatException e) {}
+
+		try
+		{
+			away = Float.valueOf(editTextAway.getText().toString());
+		}
+		catch (java.lang.NumberFormatException e) {}
+		
+		TextView stake = (TextView)  findViewById(R.id.stake);
+		int stake_candidate = -1;
+		double difference = 0.0;
+		
+		if (home > 0.0 && draw > 0.0 && away > 0.0)
+		{
+			if (win_home > 0.0 && win_none > 0.0 && win_away > 0.0)
+			{
+				if (home > 1/win_home)
+				{
+					difference = home-1/win_home;
+					stake_candidate = 0;
+				}
+				if (draw > 1/win_none && draw-1/win_none > difference)
+				{
+					difference = draw-1/win_none;
+					stake_candidate = 1;
+				}
+				if (away > 1/win_away && away-1/win_away > difference)
+				{
+					difference = away-1/win_away;
+					stake_candidate = 2;
+				}
+			}
+		}
+				
+		if (stake_candidate == 0)
+		{
+			stake.setText(mMatch.getHomeTeam().getName()+": "+String.format("%.02f",kelly(win_home,1./home))+" €");
+		}
+		else if (stake_candidate == 1)
+		{
+			stake.setText("Draw: "+String.format("%.02f",kelly(win_none,1./draw))+" €");
+		}
+		else if (stake_candidate == 2)
+		{
+			stake.setText(mMatch.getAwayTeam().getName()+": "+String.format("%.02f",kelly(win_away,1./away))+" €");
+		}
+		else
+			stake.setText("Don't!");
+
+		datasource.update_book_odds(mMatch.getId(),home,draw,away);
+	}
+	
+	double kelly(double prob_me, double prob_them)
+	{
+		return MAX_BET*(prob_me/prob_them-1)/(1/prob_them-1);
 	}
 	
 	void calculate_odds(long matchId)
 	{
 		if (matchId >= 0)
 	    {
-	    	Match mMatch = datasource.getMatch(matchId);
+	    	mMatch = datasource.getMatch(matchId);
 	    	TextView matchName = (TextView) findViewById(R.id.MatchName);
 	    	matchName.setText(mMatch.toString());
 	    	/*
@@ -156,17 +253,34 @@ public class MatchActivity extends FragmentActivity {
 	    	float home_avg_goals = 0;
 	    	float away_avg_goals = 0;
 	    	
+	    	int home_divisor = 0;
+	    	int away_divisor = 0;
+	    	
 	    	Iterator<Match> iterator = matches_home.iterator();
 	    	while (iterator.hasNext()) {
-	    		home_avg_goals += iterator.next().getHomeGoals();
+	    		Match current = iterator.next();
+	    		home_divisor += 1;
+	    		home_avg_goals += current.getHomeGoals();
+	    		if (current.getSeason().getId() ==  mSeasonId)
+	    		{
+	    			home_divisor += 1;
+	    			home_avg_goals += current.getHomeGoals();
+	    		}
 	    	}
-	    	home_avg_goals /= matches_home.size();
+	    	home_avg_goals /= home_divisor;
 	    	
 	    	iterator = matches_away.iterator();
 	    	while (iterator.hasNext()) {
-	    		away_avg_goals += iterator.next().getAwayGoals();
+	    		Match current = iterator.next();
+	    		away_divisor += 1;
+	    		away_avg_goals += current.getAwayGoals();
+	    		if (current.getSeason().getId() == mSeasonId)
+	    		{
+	    			away_divisor += 1;
+		    		away_avg_goals += current.getAwayGoals();
+	    		}
 	    	}
-	    	away_avg_goals /= matches_away.size();
+	    	away_avg_goals /= away_divisor;
 	    	
 	    	/*
 	    	 * Write average goals to textview
@@ -199,9 +313,9 @@ public class MatchActivity extends FragmentActivity {
 	        	//target = (TextView) findViewById(R.id.AwayPoisson);
 	        	//target.setText(String.format("%.02f, %.02f, %.02f, %.02f, %.02f, %.02f",away_prob[0],away_prob[1],away_prob[2],away_prob[3],away_prob[4],away_prob[5]));
 	        	
-	        	double win_home = 0;
-	        	double win_away = 0;
-	        	double win_none = 0;
+	        	win_home = 0;
+	        	win_away = 0;
+	        	win_none = 0;
 	        	for (int i=0; i<6; i++)
 	        	{
 	        		for (int j=0; j<6; j++)

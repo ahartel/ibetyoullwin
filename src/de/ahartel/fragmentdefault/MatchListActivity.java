@@ -98,14 +98,19 @@ public class MatchListActivity extends FragmentActivity
 
         if (mSeasonId >= 0)
         {
-        	MatchListFragment listfrag = ((MatchListFragment) getSupportFragmentManager()
-        			.findFragmentById(R.id.match_list_container));
-        	
-        	listfrag.setValues(datasource.getNextMatches(mSeasonId));
+        	load_next_matches();
         	
         	//listfrag.setTeams(datasource.getAllTeamsNotThis(mSeasonId,mTeamId));
         }
         
+    }
+    
+    public void load_next_matches()
+    {
+    	MatchListFragment listfrag = ((MatchListFragment) getSupportFragmentManager()
+			.findFragmentById(R.id.match_list_container));
+	
+    	listfrag.setValues(datasource.getNextMatches(mSeasonId));
     }
     
     /**
@@ -229,10 +234,11 @@ public class MatchListActivity extends FragmentActivity
     }
     
     public void update_database() {
-    	ReceiveOpenLiga rcv2013 = new ReceiveOpenLiga(this);
-    	rcv2013.execute(datasource,"https://openligadb-json.heroku.com/api/","2013");
-    	ReceiveOpenLiga rcv2012 = new ReceiveOpenLiga(this);
-    	rcv2012.execute(datasource,"https://openligadb-json.heroku.com/api/","2012");
+    	datasource.drop_recreate_db();
+    	ReceiveOpenLiga rcv = new ReceiveOpenLiga(this);
+    	rcv.execute(datasource,"https://openligadb-json.heroku.com/api/");
+    	//ReceiveOpenLiga rcv2012 = new ReceiveOpenLiga(this);
+    	//rcv2012.execute(datasource,"https://openligadb-json.heroku.com/api/","2012");
     }
 
     @Override

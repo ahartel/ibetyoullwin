@@ -7,6 +7,7 @@ public class StreamSeasonContainer {
 	public StreamTeamContainer teams;
 	public StreamGroupContainer groups;
 	public List<StreamMatch> matches;
+	public String year;
 	
 	StreamSeasonContainer()
 	{

@@ -221,6 +221,33 @@ public class MatchDataSource {
     return m;
   }
   
+  public double[] get_book_odds(long match_id)
+  {
+	  String[] columns =  {dbHelper.MO_COLUMN_HOME, dbHelper.MO_COLUMN_DRAW, dbHelper.MO_COLUMN_AWAY};
+	  Cursor cursor = database.query(dbHelper.TABLE_MATCH_ODDS,columns,dbHelper.MO_COLUMN_ID + " = " +match_id,
+			  null, null, null,null,null);
+
+	    cursor.moveToFirst();
+	    double[] ret = {0.0,0.0,0.0};
+	    
+	    if (!cursor.isAfterLast()) {
+	    	ret[0] = cursor.getDouble(0);
+	    	ret[1] = cursor.getDouble(1);
+	    	ret[2] = cursor.getDouble(2);
+	    }
+	    // Make sure to close the cursor
+	    cursor.close();
+
+	    return ret;
+  }
+  
+  public void update_book_odds(long match_id,float home, float draw, float away)
+  {
+	  database.execSQL("INSERT OR REPLACE INTO "+dbHelper.TABLE_MATCH_ODDS+" ("+dbHelper.MO_COLUMN_ID
+			  + "," + dbHelper.MO_COLUMN_HOME + "," + dbHelper.MO_COLUMN_DRAW + "," + dbHelper.MO_COLUMN_AWAY
+			  + ") VALUES ("+match_id+","+home+","+draw+","+away+")");
+  }
+  
   public void drop_recreate_db() {
 	  dbHelper.drop_recreate_except_odds(database);
   }

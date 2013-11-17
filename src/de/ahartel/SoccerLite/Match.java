@@ -58,6 +58,10 @@ public class Match {
 	this.season = s;
   }
   
+  public Season getSeason() {
+	  return this.season;
+  }
+  
   public void setHomeTeam(Team t) {
 		this.home_team = t;
 	  }

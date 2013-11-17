@@ -35,13 +35,12 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
   
   public static final String TABLE_MATCH_ODDS = "match_odds";
   public static final String MO_COLUMN_ID = "_id";
-  public static final String MO_COLUMN_TEAM = "team_id";
   public static final String MO_COLUMN_HOME = "home_odds";
   public static final String MO_COLUMN_DRAW = "draw_odds";
   public static final String MO_COLUMN_AWAY = "away_odds";
 
   private static final String DATABASE_NAME = "SoccerLite.db";
-  private static final int DATABASE_VERSION = 20;
+  private static final int DATABASE_VERSION = 21;
 
   // Database creation sql statement
   private static final String DATABASE_CREATE_SEASON = "create table "
@@ -69,8 +68,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
   
   private static final String DATABASE_CREATE_MATCH_ODDS = "create table if not exists "
 	      + TABLE_MATCH_ODDS + "(" + MO_COLUMN_ID
-	      + " integer primary key autoincrement, " + MO_COLUMN_TEAM
-	      + " integer not null, " + MO_COLUMN_HOME + " float not null, "
+	      + " integer primary key autoincrement, " + MO_COLUMN_HOME + " float not null, "
 	      + MO_COLUMN_DRAW + " float not null, " + MO_COLUMN_AWAY + " float not null);";
 
   public MySQLiteHelper(Context context) {
